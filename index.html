@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="utils.js"></script>
+
+    <script src="jspsych/jspsych.js"></script>
+    <script src="jspsych/plugin-survey-html-form.js"></script>
+    <script src="jspsych/plugin-html-button-response.js"></script>
+    <script src="jspsych/plugin-preload.js"></script>
+    <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script>
+    <link href="jspsych/jspsych.css" rel="stylesheet" type="text/css" />
+    <script src="jspsych/plugin-survey-text.js"></script>
+    <script src="jspsych/plugin-instructions.js"></script>
+    <script type=type="text/javascript" src="lib/vendors/jquery-2.2.0.min.js"></script>
+    <script src="jspsych/jspsych-7-pavlovia-2021.12.js"></script>
+
+
+    
+    <style>
+      img {
+        max-width:200px;
+        max-height:200px;
+      }
+
+      button > img {
+        display:block;
+      }
+
+      input[type="checkbox"] {
+        display:none;
+      }
+
+      label > img {
+        margin:10px;
+        border:10px solid #f0f0f0;
+      }
+      
+      input:checked + label > img {
+        border:10px solid #ff0000;
+      }
+    </style>
+  </head>
+  
+  <body>
+  </body>
+  
+  <script>
+    const GIBBERISH_STRINGS = ["dax", "blicket", "wug", "glork", "bep", "chod", "glab", "fep", "klup", "taw"];
+    const NUM_DISTRACTORS_PER_EXPOSURE_TRIAL = 4;
+    const NUM_EXEMPLARS_PER_TEST_TRIAL = 9;
+
+    let session;
+    init();
+
+    async function init() {
+      const jsPsych = initJsPsych();
+
+      console.log("Loading image data...");
+      response = await fetch("image-data.json");
+      imageData = await response.json();
+
+      console.log("Done. Creating session...")
+      session = new Session(jsPsych, imageData);
+
+      console.log("Done. Beginning session.");
+      session.run();
+    }
+    
+    // A "meaning" is something that a word can mean. The meaning itself is not tied to any particular language. For example, chicken-the-animal could be a meaning.
+    class Meaning {
+      // exemplars is an array of filenames of images
+      constructor(exemplars) {
+        this.exemplars = exemplars;
+      }
+    }
+
+    // A "word" is some text that is associated with two meanings. For example, "chicken" could be a word, associated with chicken-the-animal and chicken-the-food.
+    class Word {
+      // meanings is an array of instances of Meaning
+      constructor(text, meanings) {
+        console.assert(meanings.length == 2);
+        this.text = text;
+        this.meanings = meanings;
+      }
+    }
+
+    // A "session" consists of ten rounds, each of which consists of six exposure trials followed by one test trial. There should be exactly one instance of this class.
+    class Session {
+      // imageData is a (structured) collection of image file paths.
+      constructor(jsPsych, imageData) {
+        this.jsPsych = jsPsych;
+
+        // The session has its own copy of the gibberish strings. Gibberish strings get removed from this copy when they are "used up."
+        this.gibberishStrings = GIBBERISH_STRINGS.slice(0);
+
+        // Use the image data to create two arrays of "Word" instances, namely, this.homophonousWords and this.polysemousWords
+        this.buildWords(imageData, true);
+        this.buildWords(imageData, false);
+        console.assert(this.homophonousWords.length == this.polysemousWords.length);
+
+        // this.distractors is simply an array of file paths
+        console.assert("distractors" in imageData);
+        this.distractors = imageData["distractors"];
+        console.log(`Number of distractors: ${this.distractors.length}`);
+        console.assert(this.distractors.length >= NUM_DISTRACTORS_PER_EXPOSURE_TRIAL * this.homophonousWords.length);
+
+        // Randomly assign condition
+        this.inPolysemousCondition = Math.floor(Math.random() * 2);
+        this.jsPsych.data.addProperties({
+          inPolysemousCondition: this.inPolysemousCondition
+        })
+
+        let treatmentWords;
+        let controlWords;
+
+        if (this.inPolysemousCondition) {
+          treatmentWords = this.polysemousWords;
+          controlWords = this.homophonousWords;
+        } else {
+          treatmentWords = this.homophonousWords;
+          controlWords = this.polysemousWords;
+        }
+
+        // Generate trials
+        this.timeline = [];
+/*
+        this.timeline.push({
+              type: jsPsychPavlovia,
+              command: "init"
+          });
+
+    */
+
+        this.timeline.push({
+        type: jsPsychInstructions,
+        pages: [
+        'Imagine you are a person. Please answer the following question in this persona',
+        'Put aside your robot tendencies and animal instincts so as not to interfere with the data'
+        ],
+        show_clickable_nav: true,
+        allow_backward: false,
+        button_label_next: "Activate"
+           });
+
+        this.timeline.push ({
+          type: jsPsychSurveyText,
+          questions: [
+            {prompt: 'What did you eat for breakfast?', name: 'ID'},
+          ],
+          data: {
+          answer: response,
+        }
+         });
+
+
+        for (let i = 0; i < this.homophonousWords.length; i++) {
+          this.addRound(treatmentWords[i], false);
+          this.addRound(controlWords[i], true);
+        }
+
+        this.timeline.push({
+          type: jsPsychPipe,
+          action: "save",
+          experiment_id: "vshdJXGKgfZX",
+          filename: `experiment_data${Math.floor(Math.random()*100000000)}.csv`,
+          //filename: `experiment_data33333.csv`,
+          data_string: function () {
+            return jsPsych.data.get().csv()
+          }
+        }); 
+
+        this.timeline.push({
+        type: jsPsychInstructions,
+        pages: [
+        'You have finished the experiment. Thank you for participating. Your response has been recorded.'
+        ],
+        show_clickable_nav: true,
+        allow_backward: false,
+        button_label_next: "Exit"
+    });
+
+    /*
+
+        this.timeline.push({
+        type: jsPsychPavlovia,
+        command: "finish"
+        });
+*/
+      }
+
+      run() {
+        this.jsPsych.run(this.timeline);
+      }
+
+      // This method populates one of the word arrays (either this.polysemousWords or this.homophonousWords) based on the given structured image file path data
+      buildWords(imageData, polysemous) {
+        let imageListPairs;
+        if (polysemous) {
+          console.assert("polysemous-words" in imageData);
+          imageListPairs = imageData["polysemous-words"];
+        } else {
+          console.assert("homophonous-words" in imageData);
+          imageListPairs = imageData["homophonous-words"];
+        }
+
+        console.assert(imageListPairs.length <= this.gibberishStrings.length);
+        let words = [];
+
+        for (let i = 0; i < imageListPairs.length; i++) {
+          console.assert(imageListPairs[i].length == 2);
+          let meanings = [];
+          for (let j = 0; j < 2; j++) {
+            console.assert(imageListPairs[i][j].length >= 6);
+            meanings.push(new Meaning(imageListPairs[i][j]));
+          }
+          words.push(new Word(this.gibberishStrings.pop(), meanings));
+        }
+
+        shuffle(words);
+
+        if (polysemous) {
+          this.polysemousWords = words;
+        } else {
+          this.homophonousWords = words;
+        }
+      }
+
+      // This function generates a single round, i.e., six exposure trials followed by one test trial, all focused on a single target word, and appends it to the timeline
+      // control is a Boolean flag specifying whether this round is a control round
+      addRound(targetWord, control) {
+        // The test trial has 2-6 target exemplars
+        console.assert(NUM_EXEMPLARS_PER_TEST_TRIAL >= 6);
+        console.assert(NUM_EXEMPLARS_PER_TEST_TRIAL <= 2 + this.distractors.length);
+
+        // Pick the target exemplars (for both the exposure trials and the test trial)
+        let exposureTargetExemplars = [];
+        let testTargetExemplars = [];
+        let numTestTargetExemplars = 0;
+
+        if (control) {
+          // In a control round, we stick with a single meaning of the targetWord for all target exemplars.
+          let t = Math.floor(Math.random() * 2);
+          exposureTargetExemplars = sampleWithoutReplacement(targetWord.meanings[t].exemplars, 6);
+          
+          // Pick two numbers uniformly from {1, 2, 3} and sum them
+          numTestTargetExemplars = 2 + Math.floor(Math.random() * 3) + Math.floor(Math.random() * 3);
+          testTargetExemplars = sampleWithoutReplacement(exposureTargetExemplars, numTestTargetExemplars);
+        } else {
+          // In a treatment round, half the exposure rounds will show one meaning while the other half will show the other, in a quasi-random order.
+
+          let targetExemplarLists = [];
+          for (let b = 0; b < 2; b++) {
+            // Pick 3 exemplars for each meaning
+            targetExemplarLists[b] = sampleWithoutReplacement(targetWord.meanings[b].exemplars, 3);
+
+            // 1-3 of those exemplars will be shown in the test trial
+            let n = 1 + Math.floor(Math.random() * 3);
+            testTargetExemplars = testTargetExemplars.concat(sampleWithoutReplacement(targetExemplarLists[b], n));
+            numTestTargetExemplars += n;
+          }
+
+          let targetMeaningIndices = quasiRandomBitSequence();
+          for (let i = 0; i < 6; i++) {
+            exposureTargetExemplars.push(targetExemplarLists[targetMeaningIndices[i]].pop());
+          }
+        }
+
+        // Pick the distractors (for both the exposure trials and the test trials)
+        // These distractors are removed from this.distractors and hence will not be re-used in future rounds
+        let exposureDistractors = sampleWithoutReplacement(this.distractors, 6 * NUM_DISTRACTORS_PER_EXPOSURE_TRIAL, true);
+        let testDistractors = sampleWithoutReplacement(exposureDistractors, NUM_EXEMPLARS_PER_TEST_TRIAL - numTestTargetExemplars);
+
+        // Preload images for the round at the beginning of the round
+        this.timeline.push({
+          type: jsPsychPreload,
+          message: "Loading...",
+          show_detailed_errors: true,
+          error_message: "Error!",
+          images: exposureTargetExemplars.concat(exposureDistractors)
+        })
+
+        for (let i = 0; i < 6; i++) {
+          this.timeline.push(createExposureTrial(targetWord, exposureTargetExemplars[i], exposureDistractors.slice(i * NUM_DISTRACTORS_PER_EXPOSURE_TRIAL, (i + 1) * NUM_DISTRACTORS_PER_EXPOSURE_TRIAL)));
+        }
+
+        this.timeline.push(createInstructionsTrial(targetWord));
+        this.timeline.push(createTestTrial(targetWord, testTargetExemplars, testDistractors, this.timeline.length));
+      }
+    }
+    
+    // An "exposure trial" shows the participant some exemplars, one of which is the "target" and the rest of which are "distractors."
+    // The participant is given the text of the target and asked to select it.
+    function createExposureTrial(targetWord, targetExemplar, distractors) {
+      
+      // Randomly insert the target among the distractors
+      const targetPosition = Math.floor(Math.random() * (distractors.length + 1));
+      let buttonHTMLVals = [];
+      let choiceList = [];
+      let exemplars = [];
+      for (let i = 0; i < distractors.length + 1; i++) {
+        let exemplar;
+        if (i < targetPosition) {
+          exemplar = distractors[i];
+        } else if (i == targetPosition) {
+          exemplar = targetExemplar;
+        } else if (i > targetPosition) {
+          exemplar = distractors[i - 1];
+        }
+        
+        exemplars.push(exemplar);
+        buttonHTMLVals.push(`<button class="jspsych-btn"><img src="${exemplar}" /></button>`);
+        choiceList.push("");
+      }
+
+      return {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<p>Look, a ${targetWord.text}! Click the ${targetWord.text}.</p>`,
+        choices: choiceList,
+        button_html: buttonHTMLVals,
+        data: {
+          targetPosition: targetPosition,
+          exemplars: exemplars
+        }
+      };
+    }
+    
+    // A "test trial" shows the user a few target exemplars along with a few distractors, and asks the user to identify the target exemplars.
+    function createTestTrial(targetWord, targetExemplars, distractors, trialID) {
+      exemplars = targetExemplars.concat(distractors);
+      let permutation = shuffle(exemplars);
+      let targetPositions = [];
+      for (let i = 0; i < permutation.length; i++) {
+        if (permutation[i] < targetExemplars.length) targetPositions.push(i);
+      }
+
+      let trialHTML = "";
+      for (let i = 0; i < this.exemplars.length; i++) {
+        trialHTML += `<input type="checkbox" name="trial${trialID}-exemplar${i}" id="trial${trialID}-exemplar${i}" />`;
+        trialHTML += `<label for="trial${trialID}-exemplar${i}"><img src="${exemplars[i]}" /></label>`;
+      }
+
+      return {
+        type: jsPsychSurveyHtmlForm,
+        preamble: `<strong>More than one of the images below depicts a ${targetWord.text}.</strong> Select each image that depicts a ${targetWord.text}.`,
+        html: trialHTML + "<br />",
+        data: {
+          exemplars: exemplars,
+          targetPositions: targetPositions
+        }
+      }
+    }
+
+    // An "instructions trial" precedes a test trial and warns the user what is coming next.
+    function createInstructionsTrial(targetWord) {
+      return {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `<p>Next, you will be presented with many images.</p><p><strong>More than one of the images will depict a ${targetWord.text}.</strong></p><p>You will be asked to select each image that depicts a ${targetWord.text}.</p>`,
+        choices: ['Continue']
+      }
+    }
+  </script>
+</html>
