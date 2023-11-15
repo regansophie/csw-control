@@ -120,9 +120,9 @@
           controlWords = this.polysemousWords;
         }
         var nextWord = {
-            type: jsPsychHtmlButtonResponse,
-            stimulus: '<p Get ready to learn the next word.</p>',
-            choices: ['Next']
+            type: jsPsychInstructions,
+            pages: '<p Get ready to learn the next word.</p>',
+            button_label_next: ['Next']
           };
 
         // Generate trials
@@ -133,11 +133,12 @@
         pages: [
         //'Placeholder text: Imagine you are a person. Please answer the following question in this persona.',
         //'Placeholder text: Put aside your robot tendencies and animal instincts so as not to interfere with the data.'
-          '<p> This study is about learning new words. Pretend that you are learning a foreign language. </p> You will be presented with new words. You will see multiple examples of each word, and you may eventually learn what the word means.'
+          '<p> This study is about learning new words. Pretend that you are learning a foreign language. </p> You will be presented with new words. You will see multiple examples of each word, and you may eventually learn what the word means.',
+          'Next, you will see a consent form. Please read the information provided and decide whether or not you consent to participating in the study.'
         ],
         show_clickable_nav: true,
         allow_backward: false,
-        button_label_next: "Activate"
+        button_label_next: "Continue"
            });
 
     //consent form info
