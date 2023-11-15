@@ -177,9 +177,9 @@
         this.timeline.push (firstWord);
 
         for (let i = 0; i < this.homophonousWords.length; i++) {
+          this.timeline.push (nextWord);
           this.addRound(treatmentWords[i], false);
           this.addRound(controlWords[i], true);
-          this.timeline.push (firstWord);
         }
 
         this.timeline.push ({
