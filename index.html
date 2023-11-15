@@ -119,6 +119,11 @@
           treatmentWords = this.homophonousWords;
           controlWords = this.polysemousWords;
         }
+        var firstWord = {
+            type: jsPsychInstructions,
+            pages: '<p Get ready to learn the first word.</p>',
+            button_label_next: ['Next']
+          };
         var nextWord = {
             type: jsPsychInstructions,
             pages: '<p Get ready to learn the next word.</p>',
@@ -169,11 +174,12 @@
           prompt: "<p>Do you consent to participating in this experiment?</p>",
       });
 
-        this.timeline.push (nextWord);
+        this.timeline.push (firstWord);
 
         for (let i = 0; i < this.homophonousWords.length; i++) {
           this.addRound(treatmentWords[i], false);
           this.addRound(controlWords[i], true);
+          this.timeline.push (firstWord);
         }
 
         this.timeline.push ({
