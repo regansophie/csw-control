@@ -312,7 +312,7 @@
 
       return {
         type: jsPsychHtmlButtonResponse,
-        stimulus: `<p>Look, a ${targetWord.text}! Click the ${targetWord.text}.</p>`,
+        stimulus: `<p>Click on the <strong>${targetWord.text}</strong>.</p>`,
         choices: choiceList,
         button_html: buttonHTMLVals,
         data: {
@@ -339,7 +339,7 @@
 
       return {
         type: jsPsychSurveyHtmlForm,
-        preamble: `<strong>More than one of the images below depicts a ${targetWord.text}.</strong> Select each image that depicts a ${targetWord.text}.`,
+        preamble: `<strong>There is at least one image below that depicts the word ${targetWord.text}.</strong> There may be more than one image. Select all images that depict the word ${targetWord.text}.`,
         html: trialHTML + "<br />",
         data: {
           exemplars: exemplars,
@@ -352,7 +352,7 @@
     function createInstructionsTrial(targetWord) {
       return {
         type: jsPsychHtmlButtonResponse,
-        stimulus: `<p>Next, you will be presented with many images.</p><p><strong>More than one of the images will depict a ${targetWord.text}.</strong></p><p>You will be asked to select each image that depicts a ${targetWord.text}.</p>`,
+        stimulus: `<p>Next, you will be presented with many images.</p><p><strong> At least one image will depicts the word ${targetWord.text}. There may be more than one image that depicts the word ${targetWord.text}.</strong></p><p>You will be asked to select each image that depicts the word ${targetWord.text}.</p>`,
         choices: ['Continue']
       }
     }
