@@ -119,6 +119,11 @@
           treatmentWords = this.homophonousWords;
           controlWords = this.polysemousWords;
         }
+        var nextWord = {
+            type: jsPsychHtmlButtonResponse,
+            stimulus: '<p Get ready to learn the next word.</p>',
+            choices: ['Next']
+          };
 
         // Generate trials
         this.timeline = [];
@@ -126,8 +131,9 @@
         this.timeline.push({
         type: jsPsychInstructions,
         pages: [
-        'Placeholder text: Imagine you are a person. Please answer the following question in this persona.',
-        'Placeholder text: Put aside your robot tendencies and animal instincts so as not to interfere with the data.'
+        //'Placeholder text: Imagine you are a person. Please answer the following question in this persona.',
+        //'Placeholder text: Put aside your robot tendencies and animal instincts so as not to interfere with the data.'
+          '<p> This study is about learning new words. Pretend that you are learning a foreign language. </p> You will be presented with new words. You will see multiple examples of each word, and you may eventually learn what the word means.'
         ],
         show_clickable_nav: true,
         allow_backward: false,
@@ -161,6 +167,8 @@
           choices: ['I consent', 'I do not consent'],
           prompt: "<p>Do you consent to participating in this experiment?</p>",
       });
+
+        this.timeline.push (nextWord);
 
         for (let i = 0; i < this.homophonousWords.length; i++) {
           this.addRound(treatmentWords[i], false);
