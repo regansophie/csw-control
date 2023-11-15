@@ -333,7 +333,7 @@
 
       return {
         type: jsPsychSurveyHtmlForm,
-        preamble: `<strong>There is at least one image below that depicts the word ${targetWord.text}.</strong> There may be more than one image. Select all images that depict the word ${targetWord.text}.`,
+        preamble: `<p> <strong>There is at least one image below that depicts the word ${targetWord.text}.</strong></p> There may be more than one image. Select all images that depict the word ${targetWord.text}.`,
         html: trialHTML + "<br />",
         data: {
           exemplars: exemplars,
