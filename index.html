@@ -127,6 +127,7 @@
         var nextWord = {
             type: jsPsychInstructions,
             pages: ['<p> Get ready to learn the next word.</p>'],
+            show_clickable_nav: true,
             button_label_next: ['Next']
           };
 
@@ -174,7 +175,7 @@
           prompt: "<p>Do you consent to participating in this experiment?</p>",
       });
 
-        this.timeline.push (firstWord);
+       // this.timeline.push (firstWord);
 
         for (let i = 0; i < this.homophonousWords.length; i++) {
           this.timeline.push (nextWord);
