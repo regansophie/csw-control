@@ -181,6 +181,7 @@
         for (let i = 0; i < this.homophonousWords.length; i++) {
           this.timeline.push (nextWord);
           this.addRound(treatmentWords[i], false);
+          this.timeline.push (nextWord);
           this.addRound(controlWords[i], true);
         }
 
