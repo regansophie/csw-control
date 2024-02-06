@@ -198,7 +198,7 @@
         this.timeline.push({
           type: jsPsychPipe,
           action: "save",
-          experiment_id: "RzsR42n8svY0",
+          experiment_id: "6aRxj7tLgXfM",
           filename: `experiment_data${Math.floor(Math.random()*100000000)}.csv`,
           //filename: `experiment_data33333.csv`,
           data_string: function () {
@@ -313,8 +313,8 @@
           this.timeline.push(createExposureTrial(targetWord, exposureTargetExemplars[i], exposureDistractors.slice(i * NUM_DISTRACTORS_PER_EXPOSURE_TRIAL, (i + 1) * NUM_DISTRACTORS_PER_EXPOSURE_TRIAL)));
         }
 
-        this.timeline.push(createInstructionsTrial(targetWord));
-        this.timeline.push(createTestTrial(targetWord, testTargetExemplars, testDistractors, this.timeline.length));
+    //    this.timeline.push(createInstructionsTrial(targetWord));
+    //   this.timeline.push(createTestTrial(targetWord, testTargetExemplars, testDistractors, this.timeline.length));
       }
     }
     
