@@ -134,7 +134,17 @@
 
         // Generate trials
         this.timeline = [];
-
+        
+        this.timeline.push ({
+          type: jsPsychSurveyText,
+          questions: [
+            {prompt: 'What is your prolific ID?', name: 'prolificID'}
+          ],
+          data: {
+          answer: response,
+        }
+          
+         });
         this.timeline.push({
         type: jsPsychInstructions,
         pages: [
@@ -195,15 +205,6 @@
         }
          });
 
-        this.timeline.push ({
-          type: jsPsychSurveyText,
-          questions: [
-            {prompt: 'What is your prolific ID?', name: 'prolificID'}
-          ],
-          data: {
-          answer: response,
-        }
-         });
 
         this.timeline.push({
           type: jsPsychPipe,
