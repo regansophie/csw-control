@@ -195,6 +195,16 @@
         }
          });
 
+        this.timeline.push ({
+          type: jsPsychSurveyText,
+          questions: [
+            {prompt: 'What is your prolific ID?', name: 'prolificID'}
+          ],
+          data: {
+          answer: response,
+        }
+         });
+
         this.timeline.push({
           type: jsPsychPipe,
           action: "save",
