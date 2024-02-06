@@ -134,17 +134,7 @@
 
         // Generate trials
         this.timeline = [];
-        
-        this.timeline.push({
-        type: jsPsychInstructions,
-        pages: [
-        '<p>You have finished the experiment. Thank you for participating. Your response has been recorded. </p> Please go to https://app.prolific.com/submissions/complete?cc=CXA6XF9J',
-        ],
-        show_clickable_nav: true,
-        allow_backward: false,
-        button_label_next: "Exit"
-    });
-        
+      
         this.timeline.push ({
           type: jsPsychSurveyText,
           questions: [
@@ -230,8 +220,7 @@
         this.timeline.push({
         type: jsPsychInstructions,
         pages: [
-        '<p> You have finished the experiment. Thank you for participating. Your response has been recorded. </p>',
-        '<p> Please go to https://app.prolific.com/submissions/complete?cc=CXA6XF9J </p>',
+        '<p>You have finished the experiment. Thank you for participating. Your response has been recorded. </p> Please go to https://app.prolific.com/submissions/complete?cc=CXA6XF9J',
         ],
         show_clickable_nav: true,
         allow_backward: false,
